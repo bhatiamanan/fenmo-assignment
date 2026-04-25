@@ -37,8 +37,11 @@ export const expenseRepository = {
   },
 
   async list(category?: string, sortDesc = false): Promise<Expense[]> {
-    const filtered = category
-      ? db.data!.expenses.filter((item: ExpenseRow) => item.category === category)
+    const normalizedCategory = category?.trim().toLowerCase();
+    const filtered = normalizedCategory && normalizedCategory !== 'all'
+      ? db.data!.expenses.filter(
+          (item: ExpenseRow) => item.category.toLowerCase() === normalizedCategory,
+        )
       : db.data!.expenses.slice();
 
     const sorted = filtered.sort((a: ExpenseRow, b: ExpenseRow) => {

@@ -1,4 +1,5 @@
 import fastify from 'fastify';
+import cors from '@fastify/cors';
 import { config } from './config/index.js';
 import { expenseRoutes } from './routes/expenseRoutes.js';
 import requestLogger from './middlewares/requestLogger.js';
@@ -16,6 +17,8 @@ export function buildApp() {
       },
     },
   });
+
+  app.register(cors, { origin: true });
 
   app.register(requestLogger);
   app.register(expenseRoutes);

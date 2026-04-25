@@ -29,21 +29,43 @@ export const EXPENSE_CATEGORIES = [
   "Other",
 ] as const;
 
+type BackendExpense = {
+  id: string;
+  amountCents: number;
+  category: string;
+  description: string;
+  date: string;
+  createdAt: string;
+};
+
+type ExpensesResponse = { data: BackendExpense[]; meta: { totalAmountCents: number } };
+type ExpenseResponse = { data: BackendExpense };
+
+function normalizeExpense(expense: BackendExpense): Expense {
+  return {
+    id: expense.id,
+    amount: expense.amountCents / 100,
+    category: expense.category,
+    description: expense.description,
+    date: expense.date,
+  };
+}
+
 export function getExpenses(params: GetExpensesParams = {}): Promise<Expense[]> {
-  return apiRequest<Expense[]>("/expenses", {
+  return apiRequest<ExpensesResponse>("/expenses", {
     method: "GET",
     query: {
       category: params.category,
       sort: params.sort ?? "date_desc",
     },
-  });
+  }).then((response) => response.data.map(normalizeExpense));
 }
 
 export function createExpense(data: NewExpense): Promise<Expense> {
   const idempotencyKey = crypto.randomUUID();
-  return apiRequest<Expense>("/expenses", {
+  return apiRequest<ExpenseResponse>("/expenses", {
     method: "POST",
     body: data,
     headers: { "Idempotency-Key": idempotencyKey },
-  });
+  }).then((response) => normalizeExpense(response.data));
 }

@@ -65,6 +65,13 @@ export function ExpenseForm({ onSubmit }: Props) {
     setErrors({});
   };
 
+  const clearFieldError = (field: keyof FieldErrors) => {
+    setErrors((prev) => {
+      const { [field]: _, ...rest } = prev;
+      return rest;
+    });
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return; // hard guard against rapid double-clicks
@@ -118,7 +125,10 @@ export function ExpenseForm({ onSubmit }: Props) {
             step="0.01"
             placeholder="0.00"
             value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            onChange={(e) => {
+              setAmount(e.target.value);
+              if (errors.amount) clearFieldError("amount");
+            }}
             disabled={submitting}
             aria-invalid={!!errors.amount}
           />
@@ -131,7 +141,10 @@ export function ExpenseForm({ onSubmit }: Props) {
           <Label htmlFor="category">Category</Label>
           <Select
             value={category}
-            onValueChange={setCategory}
+            onValueChange={(value) => {
+              setCategory(value);
+              if (errors.category) clearFieldError("category");
+            }}
             disabled={submitting}
           >
             <SelectTrigger id="category" aria-invalid={!!errors.category}>
@@ -158,7 +171,10 @@ export function ExpenseForm({ onSubmit }: Props) {
           placeholder="What was this expense for?"
           rows={2}
           value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          onChange={(e) => {
+            setDescription(e.target.value);
+            if (errors.description) clearFieldError("description");
+          }}
           disabled={submitting}
           maxLength={200}
           aria-invalid={!!errors.description}
